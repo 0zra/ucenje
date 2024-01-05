@@ -79,6 +79,7 @@ const CreatePostWizard = () => {
 
 const Home: NextPage = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   if (postsLoading)
     return (
@@ -88,7 +89,6 @@ const Home: NextPage = () => {
     );
 
   if (!data) return <div>Something went wrong</div>;
-  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   return (
     <>
