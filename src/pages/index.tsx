@@ -10,7 +10,7 @@ import {
 
 import { api } from "~/utils/api";
 import { use, useState } from "react";
-import { LoadingPage } from "~/components/loading";
+import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { PostView } from "~/components/postview";
 
 const CreatePostWizard = () => {
@@ -18,22 +18,22 @@ const CreatePostWizard = () => {
 
   const [input, setInput] = useState("");
 
-  // const ctx = api.useContext();
+  const ctx = api.useContext();
 
-  // const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
-  //   onSuccess: () => {
-  //     setInput("");
-  //     void ctx.posts.getAll.invalidate();
-  //   },
-  //   onError: (e) => {
-  //     const errorMessage = e.data?.zodError?.fieldErrors.content;
-  //     if (errorMessage && errorMessage[0]) {
-  //       toast.error(errorMessage[0]);
-  //     } else {
-  //       toast.error("Failed to post! Please try again later.");
-  //     }
-  //   },
-  // });
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate();
+    },
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content;
+      // if (errorMessage && errorMessage[0]) {
+      //   toast.error(errorMessage[0]);
+      // } else {
+      //   toast.error("Failed to post! Please try again later.");
+      // }
+    },
+  });
 
   if (!user) return null;
 
@@ -59,20 +59,20 @@ const CreatePostWizard = () => {
           if (e.key === "Enter") {
             e.preventDefault();
             if (input !== "") {
-              // mutate({ content: input });
+              mutate({ content: input });
             }
           }
         }}
-        // disabled={isPosting}
+        disabled={isPosting}
       />
-      {/* {input !== "" && !isPosting && (
+      {input !== "" && !isPosting && (
         <button onClick={() => mutate({ content: input })}>Post</button>
       )}
       {isPosting && (
         <div className="flex items-center justify-center">
           <LoadingSpinner size={20} />
         </div>
-      )} */}
+      )}
     </div>
   );
 };
