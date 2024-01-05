@@ -110,7 +110,7 @@ const Home: NextPage = () => {
 
           <div className="flex grow flex-col overflow-y-scroll">
             {data?.map((fullPost) => (
-              <PostView {...fullPost} />
+              <PostView {...fullPost} key={fullPost.post.id} />
             ))}
           </div>
         </div>
