@@ -77,9 +77,8 @@ const CreatePostWizard = () => {
   );
 };
 
-const Home: NextPage = () => {
+const Feed = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
-  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   if (postsLoading)
     return (
@@ -89,6 +88,24 @@ const Home: NextPage = () => {
     );
 
   if (!data) return <div>Something went wrong</div>;
+
+  return (
+    <div className="flex grow flex-col overflow-y-scroll">
+      {[...data].map((fullPost) => (
+        <PostView {...fullPost} key={fullPost.post.id} />
+      ))}
+    </div>
+  );
+};
+
+const Home: NextPage = () => {
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
+
+  // Start fetching asap
+  api.posts.getAll.useQuery();
+
+  // Return empty div if user isn't loaded
+  if (!userLoaded) return <div />;
 
   return (
     <>
@@ -108,11 +125,7 @@ const Home: NextPage = () => {
             {isSignedIn && <CreatePostWizard />}
           </div>
 
-          <div className="flex grow flex-col overflow-y-scroll">
-            {data?.map((fullPost) => (
-              <PostView {...fullPost} key={fullPost.post.id} />
-            ))}
-          </div>
+          <Feed />
         </div>
       </main>
     </>
