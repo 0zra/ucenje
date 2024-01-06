@@ -4,9 +4,7 @@ import { z } from "zod";
 
 import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-
-const filterUsersForClient = (user: User) => ({id: user.id, username: user.username, profileImageUrl: user.profileImageUrl})
-
+import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis"; // see below for cloudflare and fastly adapters
@@ -34,7 +32,7 @@ export const postsRouter = createTRPCRouter({
     const users =( await clerkClient.users.getUserList({
       userId: posts.map((post) => post.authorId),
       limit: 100
-    })).map(filterUsersForClient)
+    })).map(filterUserForClient)
 
     console.log( users)
 
