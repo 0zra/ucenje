@@ -12,6 +12,7 @@ import { api } from "~/utils/api";
 import { use, useState } from "react";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { PostView } from "~/components/postview";
+import toast from "react-hot-toast";
 
 const CreatePostWizard = () => {
   const { user } = useUser();
@@ -27,11 +28,11 @@ const CreatePostWizard = () => {
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
-      // if (errorMessage && errorMessage[0]) {
-      //   toast.error(errorMessage[0]);
-      // } else {
-      //   toast.error("Failed to post! Please try again later.");
-      // }
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to post! Please try again later.");
+      }
     },
   });
 
