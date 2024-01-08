@@ -59,7 +59,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getStaticProps: GetStaticProps = (context) => {
   // const ssg = generateSSGHelper();
 
   const slug = context.params?.slug;

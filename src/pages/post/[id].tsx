@@ -24,7 +24,7 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getStaticProps: GetStaticProps = (context) => {
   // const ssg = generateSSGHelper();
 
   const id = context.params?.id;
