@@ -9,19 +9,19 @@ import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import { PageLayout } from "~/components/layout";
 
 const ProfileFeed = (props: { userId: string }) => {
-  // const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
-  //   userId: props.userId,
-  // });
+  const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
+    userId: props.userId,
+  });
 
-  // if (isLoading) return <LoadingPage />;
+  if (isLoading) return <LoadingPage />;
 
-  // if (!data || data.length === 0) return <div>User has not posted</div>;
+  if (!data || data.length === 0) return <div>User has not posted</div>;
 
   return (
     <div className="flex flex-col">
-      {/* {data.map((fullPost) => (
+      {data.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
-      ))} */}
+      ))}
     </div>
   );
 };
@@ -52,7 +52,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
         <div className="p-4 text-2xl font-bold">{`@${
           data.username ?? data.externalUsername ?? "unknown"
         }`}</div>
-        <div className="w-full border-b border-slate-400" />
+        <div className="h-[50px] w-full border-b border-slate-400" />
         <ProfileFeed userId={data.id} />
       </PageLayout>
     </>

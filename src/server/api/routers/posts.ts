@@ -8,6 +8,47 @@ import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis"; // see below for cloudflare and fastly adapters
+import { Post } from "@prisma/client";
+
+
+const addUserDataToPosts = async (posts: Post[]) => {
+  const userId = posts.map((post) => post.authorId);
+  const users = (
+    await clerkClient.users.getUserList({
+      userId: userId,
+      limit: 110,
+    })
+  ).map(filterUserForClient);
+
+  return posts.map((post) => {
+    const author = users.find((user) => user.id === post.authorId);
+
+    if (!author) {
+      console.error("AUTHOR NOT FOUND", post);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `Author for post not found. POST ID: ${post.id}, USER ID: ${post.authorId}`,
+      });
+    }
+    if (!author.username) {
+      // user the ExternalUsername
+      if (!author.externalUsername) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Author has no GitHub Account: ${author.id}`,
+        });
+      }
+      author.username = author.externalUsername;
+    }
+    return {
+      post,
+      author: {
+        ...author,
+        username: author.username ?? "(username not found)",
+      },
+    };
+  });
+};
 
 // Create a new ratelimiter, that allows 3 requests per 1 min
 const ratelimit = new Ratelimit({
@@ -26,27 +67,23 @@ export const postsRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.prisma.post.findMany({
       take: 100,
-      orderBy: [{'createdAt': 'desc'}]
+      orderBy: [{ createdAt: "desc" }],
     });
 
-    const users =( await clerkClient.users.getUserList({
-      userId: posts.map((post) => post.authorId),
-      limit: 100
-    })).map(filterUserForClient)
-
-    console.log( users)
-
-
-    return posts.map((post) => {
-      const author = users.find((user) => user.id === post.authorId)
-      if(!author || !author.username) throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: "Author not found"})
-
-      return {
-        post,
-         author: {...author, username: author.username}
-      }
-    });
+    return addUserDataToPosts(posts)
+    
   }),
+
+  getPostsByUserId: publicProcedure.input(z.object({
+    userId: z.string(), 
+  })).query(async ({ ctx, input }) => await ctx.prisma.post.findMany({
+      where: {
+        authorId: input.userId
+      },
+      take: 100,
+      orderBy: [{'createdAt': 'desc'}]
+    }).then(addUserDataToPosts)),
+
 
   create: privateProcedure.input(
     z.object({
